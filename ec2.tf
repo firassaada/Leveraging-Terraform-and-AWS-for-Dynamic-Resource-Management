@@ -41,7 +41,6 @@ resource "aws_default_subnet" "default_az1" {
 
 # create security group for the ec2 instance
 resource "aws_security_group" "ec2_security_group" {
-  count = var.create_security_group ? 1 : 0
   name        = "ec2 security group"
   description = "allow access on ports 80 and 22"
   vpc_id      = aws_default_vpc.default_vpc.id
