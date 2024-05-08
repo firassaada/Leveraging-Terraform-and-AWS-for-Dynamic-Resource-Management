@@ -106,6 +106,25 @@ resource "aws_instance" "ec2_instance" {
 }
 
 
+resource "aws_cloudwatch_metric_alarm" "myalarm" {
+  alarm_name          = "daeomo_alarm"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "10"
+  alarm_description   = "This alarm is triggered if CPU utilization is under 10% for 4 minutes."
+  dimensions {
+    InstanceId = "aws_instance.ec2_instance.id"
+  }
+
+  alarm_actions = ["arn:aws:automate:us-east-1:ec2:stop"]
+}
+
+
+
 # print the url of the server
 output "ec2_public_ipv4_url" {
   value = join("", ["http://", aws_instance.ec2_instance.public_ip])
