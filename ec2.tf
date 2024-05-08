@@ -104,8 +104,6 @@ resource "aws_instance" "ec2_instance" {
     Name = "techmax server"
   }
 }
-
-
 resource "aws_cloudwatch_metric_alarm" "myalarm" {
   alarm_name          = "daeomo_alarm"
   comparison_operator = "LessThanOrEqualToThreshold"
@@ -118,13 +116,31 @@ resource "aws_cloudwatch_metric_alarm" "myalarm" {
   alarm_description   = "This alarm is triggered if CPU utilization is under 10% for 4 minutes."
   dimensions = {
     InstanceId = aws_instance.ec2_instance.id
-    
   }
 
   alarm_actions = ["arn:aws:automate:us-east-1:ec2:stop"]
 }
 
+resource "aws_cloudwatch_event_rule" "trigger_deployment_rule" {
+  name        = "trigger_deployment_rule"
+  description = "Trigger CodePipeline execution on CloudWatch Alarm state change"
+  event_pattern = <<PATTERN
+{
+  "source": ["aws.cloudwatch"],
+  "detail-type": ["CloudWatch Alarm State Change"],
+  "detail": {
+    "state": ["ALARM"],
+    "alarmName": ["${aws_cloudwatch_metric_alarm.myalarm.alarm_name}"]
+  }
+}
+PATTERN
+}
 
+resource "aws_cloudwatch_event_target" "trigger_deployment_target" {
+  rule      = aws_cloudwatch_event_rule.trigger_deployment_rule.name
+  target_id = "trigger-deployment-target"
+  arn       = "arn:aws:codepipeline:us-east-1:730335578247:pipeline/redployment1"
+}
 
 # print the url of the server
 output "ec2_public_ipv4_url" {
