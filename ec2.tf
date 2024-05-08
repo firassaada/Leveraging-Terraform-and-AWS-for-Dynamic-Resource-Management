@@ -118,6 +118,7 @@ resource "aws_cloudwatch_metric_alarm" "myalarm" {
   alarm_description   = "This alarm is triggered if CPU utilization is under 10% for 4 minutes."
   dimensions = {
     InstanceId = "aws_instance.ec2_instance.id"
+    
   }
 
   alarm_actions = ["arn:aws:automate:us-east-1:ec2:stop"]
