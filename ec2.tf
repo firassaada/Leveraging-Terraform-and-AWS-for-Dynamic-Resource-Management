@@ -142,7 +142,8 @@ resource "aws_cloudwatch_event_target" "trigger_deployment_target" {
   rule      = aws_cloudwatch_event_rule.trigger_deployment_rule.name
   target_id = "trigger-deployment-target"
   arn       = "arn:aws:codepipeline:us-east-1:730335578247:redployment1"
-              
+  role_arn  = "arn:aws:iam::730335578247:role/service-role/AWSCodePipelineServiceRole-us-east-1-redployment1"
+           
 }
 
 
