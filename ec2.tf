@@ -141,7 +141,8 @@ PATTERN
 resource "aws_cloudwatch_event_target" "trigger_deployment_target" {
   rule      = aws_cloudwatch_event_rule.trigger_deployment_rule.name
   target_id = "trigger-deployment-target"
-  arn       = "arn:aws:codepipeline:us-east-1:730335578247:pipeline/redployment1"
+  arn       = "arn:aws:codepipeline:us-east-1:730335578247:redployment1"
+              
 }
 
 
