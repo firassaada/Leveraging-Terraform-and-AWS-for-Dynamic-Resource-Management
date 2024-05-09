@@ -120,9 +120,7 @@ resource "aws_cloudwatch_metric_alarm" "myalarm" {
     InstanceId = aws_instance.ec2_instance.id
   }
 
-  alarm_actions = ["arn:aws:automate:us-east-1:ec2:stop"
-                   "arn:aws:lambda:us-east-1:730335578247:trigger_code_pipeline"
-  ]
+  alarm_actions = [                 "arn:aws:lambda:us-east-1:730335578247:trigger_code_pipeline" ]
 }
 
 
