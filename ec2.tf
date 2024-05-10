@@ -157,20 +157,21 @@ resource "aws_iam_role" "lambda_execution_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachments" {
+resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment_lambda" {
   role       = aws_iam_role.lambda_execution_role.name
-
-  policy_arn = [
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-    "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess",
-    # Add more policy ARNs if needed
-  ]
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
+
+resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment_codepipeline" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
+}
+
 
 resource "aws_lambda_permission" "allow_cloudwatch_invoke" {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function.function_name
+  function_name = aws_lambda_function.trigger_code_pipeline.function_name
   principal     = "lambda.alarms.cloudwatch.amazonaws.com"  # CloudWatch principal
 
   source_arn = "arn:aws:cloudwatch:us-east-1:730335578247:alarm:*"  # Modify as needed
