@@ -137,10 +137,9 @@ resource "aws_cloudwatch_metric_alarm" "myalarm2" {
   threshold           = "10"
   alarm_description   = "This alarm is triggered if CPU utilization is under 10% for 4 minutes."
   dimensions = {
-      InstanceId = [
-      aws_instance.ec2_instance.id,
-      aws_instance.ec2_instance2.id,
-    ]
+      InstanceId  =       aws_instance.ec2_instance.id
+      InstanceId2 =       aws_instance.ec2_instance2.id
+    
   }
 
 }
