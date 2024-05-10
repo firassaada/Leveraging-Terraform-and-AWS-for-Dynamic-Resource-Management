@@ -192,14 +192,15 @@ resource "aws_cloudwatch_metric_alarm" "myalarm2" {
   dimensions = {
       InstanceId  =       aws_instance.ec2_instance.id
   }
+    alarm_actions = [ "arn:aws:lambda:us-east-1:730335578247:function:${aws_lambda_function.trigger_code_pipeline2.function_name}" ]
 
 }
 
 
 # Lambda function to trigger CodePipeline
-resource "aws_lambda_function" "trigger_code_pipeline" {
+resource "aws_lambda_function" "trigger_code_pipeline2" {
   filename      = "lambda_function.zip"
-  function_name = "trigger_code_pipeline"
+  function_name = "trigger_code_pipeline2"
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.8"
   role          = aws_iam_role.lambda_execution_role.arn
@@ -243,7 +244,7 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment_co
 resource "aws_lambda_permission" "allow_cloudwatch_invoke" {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.trigger_code_pipeline.function_name
+  function_name = aws_lambda_function.trigger_code_pipeline2.function_name
   principal     = "lambda.alarms.cloudwatch.amazonaws.com"  # CloudWatch principal
 
   source_arn = "arn:aws:cloudwatch:us-east-1:730335578247:alarm:*"  # Modify as needed
