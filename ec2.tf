@@ -99,7 +99,7 @@ data "aws_ami" "amazon_linux_2" {
 
 
 # launch the ec2 instances and install website
-resource "aws_instance" "ec2_instance1" {
+resource "aws_instance" "ec2_instance" {
   ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = "t2.micro"
   subnet_id              = aws_default_subnet.default_az1.id
