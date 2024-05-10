@@ -18,23 +18,30 @@ terraform {
 
 # create default vpc if one does not exit
 resource "aws_default_vpc" "default_vpc" {
-
   tags = {
     Name = "default vpc"
   }
 }
 
 
-# use data source to get all avalablility zones in region
+# use data source to get all availability zones in region
 data "aws_availability_zones" "available_zones" {}
 
 
-# create default subnet if one does not exit
+# create default subnets if one does not exist
 resource "aws_default_subnet" "default_az1" {
   availability_zone = data.aws_availability_zones.available_zones.names[0]
 
   tags = {
-    Name = "default subnet"
+    Name = "default subnet 1"
+  }
+}
+
+resource "aws_default_subnet" "default_az2" {
+  availability_zone = data.aws_availability_zones.available_zones.names[1]
+
+  tags = {
+    Name = "default subnet 2"
   }
 }
 
@@ -91,8 +98,8 @@ data "aws_ami" "amazon_linux_2" {
 }
 
 
-# launch the ec2 instance and install website
-resource "aws_instance" "ec2_instance" {
+# launch the ec2 instances and install website
+resource "aws_instance" "ec2_instance1" {
   ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = "t2.micro"
   subnet_id              = aws_default_subnet.default_az1.id
@@ -101,16 +108,31 @@ resource "aws_instance" "ec2_instance" {
   user_data              = file("install_techmax.sh")
 
   tags = {
-    Name = "techmax server"
+    Name = "techmax server 1"
   }
 }
+
+resource "aws_instance" "ec2_instance2" {
+  ami                    = data.aws_ami.amazon_linux_2.id
+  instance_type          = "t2.micro"
+  subnet_id              = aws_default_subnet.default_az2.id
+  vpc_security_group_ids = [aws_security_group.ec2_security_group.id]
+  key_name               = "ec2_terraform"
+  user_data              = file("install_techmax.sh")
+
+  tags = {
+    Name = "techmax server 2"
+  }
+}
+
+
 resource "aws_cloudwatch_metric_alarm" "myalarm" {
   alarm_name          = "daeomo_alarm"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "120"
+  period              = "60"
   statistic           = "Average"
   threshold           = "10"
   alarm_description   = "This alarm is triggered if CPU utilization is under 10% for 4 minutes."
@@ -118,29 +140,63 @@ resource "aws_cloudwatch_metric_alarm" "myalarm" {
     InstanceId = aws_instance.ec2_instance.id
   }
 
-  alarm_actions = ["arn:aws:automate:us-east-1:ec2:stop"]
+  alarm_actions = [                 "arn:aws:lambda:us-east-1:730335578247:function:${aws_lambda_function.trigger_code_pipeline.function_name}" ]
 }
 
-resource "aws_cloudwatch_event_rule" "trigger_deployment_rule" {
-  name        = "trigger_deployment_rule"
-  description = "Trigger CodePipeline execution on CloudWatch Alarm state change"
-  event_pattern = <<PATTERN
-{
-  "source": ["aws.cloudwatch"],
-  "detail-type": ["CloudWatch Alarm State Change"],
-  "detail": {
-    "state": ["ALARM"],
-    "alarmName": ["${aws_cloudwatch_metric_alarm.myalarm.alarm_name}"]
+
+# Lambda function to trigger CodePipeline
+resource "aws_lambda_function" "trigger_code_pipeline" {
+  filename      = "lambda_function.zip"
+  function_name = "trigger_code_pipeline"
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.8"
+  role          = aws_iam_role.lambda_execution_role.arn
+  source_code_hash = filebase64sha256("lambda_function.zip")
+
+  environment {
+    variables = {
+      PIPELINE_NAME = "redployment1"
+    }
   }
 }
-PATTERN
+
+# IAM Role for Lambda function
+resource "aws_iam_role" "lambda_execution_role" {
+  name = "lambda_execution_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
-resource "aws_cloudwatch_event_target" "trigger_deployment_target" {
-  rule      = aws_cloudwatch_event_rule.trigger_deployment_rule.name
-  target_id = "trigger-deployment-target"
-  arn       = "arn:aws:codepipeline:us-east-1:730335578247:pipeline/redployment1"
+resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment_lambda" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
+
+resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment_codepipeline" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipeline_FullAccess"
+}
+
+
+resource "aws_lambda_permission" "allow_cloudwatch_invoke" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.trigger_code_pipeline.function_name
+  principal     = "lambda.alarms.cloudwatch.amazonaws.com"  # CloudWatch principal
+
+  source_arn = "arn:aws:cloudwatch:us-east-1:730335578247:alarm:*"  # Modify as needed
+}
+
 
 # print the url of the server
 output "ec2_public_ipv4_url" {
