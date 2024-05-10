@@ -14,4 +14,4 @@ terraform init
 
 # destroy terraform
 
-  #terraform destroy -auto-approve
+#terraform destroy -auto-approve
