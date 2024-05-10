@@ -126,6 +126,59 @@ resource "aws_instance" "ec2_instance2" {
 }
 
 
+# Create a load balancer
+resource "aws_lb" "my_lb" {
+  name               = "my-load-balancer"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.ec2_security_group.id]
+  subnets            = [aws_default_subnet.default_az1.id, aws_default_subnet.default_az2.id]
+
+  tags = {
+    Name = "My Load Balancer"
+  }
+}
+
+# Create a listener for the load balancer
+resource "aws_lb_listener" "my_lb_listener" {
+  load_balancer_arn = aws_lb.my_lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.my_target_group.arn
+  }
+}
+
+# Create a target group for the load balancer
+resource "aws_lb_target_group" "my_target_group" {
+  name     = "my-target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_default_vpc.default_vpc.id
+
+  health_check {
+    protocol = "HTTP"
+    port     = 80
+    path     = "/"
+    timeout  = 5
+  }
+}
+
+# Register EC2 instances with the target group
+resource "aws_lb_target_group_attachment" "instance_attachment1" {
+  target_group_arn = aws_lb_target_group.my_target_group.arn
+  target_id        = aws_instance.ec2_instance.id
+}
+
+resource "aws_lb_target_group_attachment" "instance_attachment2" {
+  target_group_arn = aws_lb_target_group.my_target_group.arn
+  target_id        = aws_instance.ec2_instance2.id
+}
+
+
+
 resource "aws_cloudwatch_metric_alarm" "myalarm2" {
   alarm_name          = "daeomo_alarm2"
   comparison_operator = "LessThanOrEqualToThreshold"
@@ -138,8 +191,6 @@ resource "aws_cloudwatch_metric_alarm" "myalarm2" {
   alarm_description   = "This alarm is triggered if CPU utilization is under 10% for 4 minutes."
   dimensions = {
       InstanceId  =       aws_instance.ec2_instance.id
-      InstanceId2 =       aws_instance.ec2_instance2.id
-    
   }
 
 }
