@@ -120,14 +120,61 @@ resource "aws_cloudwatch_metric_alarm" "myalarm" {
     InstanceId = aws_instance.ec2_instance.id
   }
 
-  alarm_actions = [                 "arn:aws:lambda:us-east-1:730335578247:function:trigger_code_pipeline" ]
+  alarm_actions = [                 "arn:aws:lambda:us-east-1:730335578247:function:${aws_lambda_function.trigger_code_pipeline.function_name}" ]
 }
 
 
+# Lambda function to trigger CodePipeline
+resource "aws_lambda_function" "trigger_code_pipeline" {
+  filename      = "lambda_function.zip"
+  function_name = "trigger_code_pipeline"
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.8"
+  role          = aws_iam_role.lambda_execution_role.arn
+  source_code_hash = filebase64sha256("lambda_function.zip")
 
+  environment {
+    variables = {
+      PIPELINE_NAME = "redployment1"
+    }
+  }
+}
 
+# IAM Role for Lambda function
+resource "aws_iam_role" "lambda_execution_role" {
+  name = "lambda_execution_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
 
+resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachments" {
+  role       = aws_iam_role.lambda_execution_role.name
 
+  policy_arn = [
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+    "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess",
+    # Add more policy ARNs if needed
+  ]
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_invoke" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function.function_name
+  principal     = "lambda.alarms.cloudwatch.amazonaws.com"  # CloudWatch principal
+
+  source_arn = "arn:aws:cloudwatch:us-east-1:730335578247:alarm:*"  # Modify as needed
+}
 
 
 # print the url of the server
