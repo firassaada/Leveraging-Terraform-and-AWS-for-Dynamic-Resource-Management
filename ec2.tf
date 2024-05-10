@@ -179,22 +179,25 @@ resource "aws_lb_target_group_attachment" "instance_attachment2" {
 
 
 
-resource "aws_cloudwatch_metric_alarm" "myalarm2" {
+resource "aws_cloudwatch_metric_alarm" "http_request_alarm" {
   alarm_name          = "daeomo_alarm2"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
+  metric_name         = "HttpRequestCount"   # Name of the metric related to HTTP requests
   namespace           = "AWS/EC2"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "10"
-  alarm_description   = "This alarm is triggered if CPU utilization is under 10% for 4 minutes."
+  period              =  "60" # 5 minutes (adjust as per your requirements)
+  statistic           = "Sum"
+  threshold           = "10"# Example threshold for triggering the alarm
+  alarm_description   = "Alarm triggered if HTTP request count below 10 in 1 minute."
+  
   dimensions = {
-      InstanceId  =       aws_instance.ec2_instance.id
+    InstanceId = aws_instance.ec2_instance.id
   }
-    alarm_actions = [ "arn:aws:lambda:us-east-1:730335578247:function:${aws_lambda_function.trigger_code_pipeline2.function_name}" ]
+
+ alarm_actions = [ "arn:aws:lambda:us-east-1:730335578247:function:${aws_lambda_function.trigger_code_pipeline2.function_name}" ]
 
 }
+
 
 
 # Lambda function to trigger CodePipeline
