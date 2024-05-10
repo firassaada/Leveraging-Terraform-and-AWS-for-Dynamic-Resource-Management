@@ -104,7 +104,23 @@ resource "aws_instance" "ec2_instance" {
     Name = "techmax server"
   }
 }
+resource "aws_cloudwatch_metric_alarm" "myalarm" {
+  alarm_name          = "daeomo_alarm"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "20"
+  alarm_description   = "This alarm is triggered if CPU utilization is under 20% for 2 minutes."
+  dimensions = {
+    InstanceId = aws_instance.ec2_instance.id
+  }
 
+  alarm_actions = [                 "arn:aws:lambda:us-east-1:730335578247:function:${aws_lambda_function.trigger_code_pipeline.function_name}" ]
+}
+/*
 resource "aws_cloudwatch_metric_alarm" "myalarm" {
   alarm_name          = "http-request-alarm"
   comparison_operator = "GreaterThanOrEqualToThreshold"
@@ -122,6 +138,7 @@ resource "aws_cloudwatch_metric_alarm" "myalarm" {
 
  alarm_actions = [                 "arn:aws:lambda:us-east-1:730335578247:function:${aws_lambda_function.trigger_code_pipeline.function_name}" ]
 }
+*/
 
 
 
