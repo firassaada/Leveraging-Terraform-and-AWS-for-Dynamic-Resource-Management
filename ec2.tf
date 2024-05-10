@@ -179,7 +179,7 @@ resource "aws_lb_target_group_attachment" "instance_attachment2" {
 
 
 
-resource "aws_cloudwatch_metric_alarm" "http_request_alarm" {
+resource "aws_cloudwatch_metric_alarm" "myalarm2" {
   alarm_name          = "daeomo_alarm2"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
