@@ -106,14 +106,14 @@ resource "aws_instance" "ec2_instance" {
 }
 resource "aws_cloudwatch_metric_alarm" "myalarm" {
   alarm_name          = "daeomo_alarm"
-  comparison_operator = "LessThanOrEqualToThreshold"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
   period              = "60"
   statistic           = "Average"
   threshold           = "20"
-  alarm_description   = "This alarm is triggered if CPU utilization is under 20% for 2 minutes."
+  alarm_description   = "This alarm is triggered if CPU utilization is greater than 20% for 2 minutes."
   dimensions = {
     InstanceId = aws_instance.ec2_instance.id
   }
