@@ -177,8 +177,8 @@ resource "aws_lb_target_group_attachment" "instance_attachment2" {
   target_id        = aws_instance.ec2_instance2.id
 }
 
-resource "aws_cloudwatch_metric_alarm" "myalarm" {
-  alarm_name          = "daeomo_alarm"
+resource "aws_cloudwatch_metric_alarm" "myalarm2" {
+  alarm_name          = "daeomo_alarm2"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
