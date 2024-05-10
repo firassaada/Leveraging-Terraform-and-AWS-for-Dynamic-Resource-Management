@@ -164,7 +164,7 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment_la
 
 resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment_codepipeline" {
   role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodePipeline_FullAccess"
 }
 
 
