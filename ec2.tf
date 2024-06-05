@@ -153,7 +153,7 @@ resource "aws_lambda_function" "trigger_code_pipeline" {
 
   environment {
     variables = {
-      PIPELINE_NAME = "redployment1"
+      PIPELINE_NAME = "Scaling_Deployment"
     }
   }
 }
