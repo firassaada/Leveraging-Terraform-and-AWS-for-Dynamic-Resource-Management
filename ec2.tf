@@ -1,20 +1,19 @@
 # configured aws provider with proper credentials
 provider "aws" {
   region  = "us-east-1"
-  profile = "ssh_admin_user"
+  profile = "terraform-user"
 }
 
 
 # store the terraform state file in s3
 terraform {
   backend "s3" {
-    bucket  = "aosnote-terraform-state-bucket-firas"
+    bucket  = "aosnote-terraform-state-bucket-firas1"
     key     = "build/terraform.tfstate"
     region  = "us-east-1"
-    profile = "ssh_admin_user"
+    profile = "terraform-user"
   }
 }
-
 
 # create default vpc if one does not exit
 resource "aws_default_vpc" "default_vpc" {
