@@ -1,4 +1,4 @@
-# Triggering_first_deployment_via_git_push
+#Triggering first deployment via git push
 # configured aws provider with proper credentials
 provider "aws" {
   region  = "us-east-1"
