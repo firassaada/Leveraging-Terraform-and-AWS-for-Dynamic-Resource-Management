@@ -1,5 +1,4 @@
-# Trigering the first pipeline through a github push
-
+# Triggering_first_deployment_via_git_push
 # configured aws provider with proper credentials
 provider "aws" {
   region  = "us-east-1"
