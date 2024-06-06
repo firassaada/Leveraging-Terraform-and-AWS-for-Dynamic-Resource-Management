@@ -1,4 +1,5 @@
 # Trigering the first pipeline through a github push
+
 # configured aws provider with proper credentials
 provider "aws" {
   region  = "us-east-1"
