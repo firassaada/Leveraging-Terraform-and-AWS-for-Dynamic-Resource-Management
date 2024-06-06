@@ -190,7 +190,7 @@ resource "aws_cloudwatch_metric_alarm" "myalarm2" {
     InstanceId = aws_instance.ec2_instance.id
   }
 
-  alarm_actions = [                 "arn:aws:lambda:us-east-1:730335578247:function:${aws_lambda_function.trigger_code_pipeline2.function_name}" ]
+  alarm_actions = [                 "arn:aws:lambda:us-east-1:682062947569:function:${aws_lambda_function.trigger_code_pipeline2.function_name}" ]
 }
 /*
 resource "aws_cloudwatch_metric_alarm" "myalarm2" {
