@@ -192,7 +192,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_invoke" {
   function_name = aws_lambda_function.trigger_code_pipeline.function_name
   principal     = "lambda.alarms.cloudwatch.amazonaws.com"  # CloudWatch principal
 
-  source_arn = "arn:aws:cloudwatch:us-east-1:730335578247:alarm:*"  # Modify as needed
+  source_arn = "arn:aws:cloudwatch:us-east-1:682062947569:alarm:*"  # Modify as needed
 }
 
 
