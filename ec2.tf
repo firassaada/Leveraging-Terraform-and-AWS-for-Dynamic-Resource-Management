@@ -150,6 +150,8 @@ resource "aws_lb_listener" "my_lb_listener" {
   }
 }
 
+
+
 # Create a target group for the load balancer
 resource "aws_lb_target_group" "my_target_group" {
   name     = "my-target-group"
